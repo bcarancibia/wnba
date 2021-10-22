@@ -7,7 +7,7 @@ library(ggforce)
 library(magick)
 library(ggtext)
 library(extrafont)
-library(BasketballAnalyzeR)
+
 
 
 """""
@@ -17,6 +17,7 @@ a8dadc
 457b9d
 1d3557
 """""
+
 theme_ben <- function () { 
   theme_minimal(base_size=9, base_family="Consolas") %+replace% 
     theme(
@@ -73,6 +74,7 @@ tictoc::toc()
 subset player box scores for more than 500 minutes
 first step is iterate through and group players
 second step is to mutate 
+
 """""
 
 
@@ -87,6 +89,17 @@ sub_pbox$min = as.numeric(as.character(sub_pbox$min))
 
 sub_pbox[is.na(sub_pbox)] = 0
 
+summarise_pbox <- sub_pbox %>%
+  group_by(athlete_display_name) %>%
+  summarise(mins = mean(min), pts = mean(pts), ast = mean(ast), to = mean(to))
+
+ggplot(summarise_pbox, aes(x = pts, y = ast)) +
+  geom_point() + 
+  theme_ben()
+
+
+
+"""""
 sub_pbox <- sub_pbox %>%
   group_by(athlete_display_name, season) %>%
   mutate(mins_avg = mean(min)) %>%
@@ -95,15 +108,12 @@ sub_pbox <- sub_pbox %>%
   mutate(to_avg = mean(to)) %>%
   mutate(sum_min = sum(min))
 
-
-
 year_2018 <- sub_pbox %>%
   filter(season == 2018) %>%
   group_by(athlete_display_name) %>%
   summarise(mins = mean(min), pts = mean(pts), ast = mean(ast), to = mean(to)) %>%
   mutate()
 
-"""""
 attach(year_2018)
 X <- data.frame(ast, to, pts)/mins
 detach(year_2018)
@@ -112,4 +122,5 @@ THIS IS WRONG
 
 ggplot(X, aes(x=ast, y=to, color = pts)) +
   geom_point()
+  
 """""
