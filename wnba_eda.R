@@ -19,7 +19,7 @@ a8dadc
 """""
 
 theme_ben <- function () { 
-  theme_minimal(base_size=9, base_family="Consolas") %+replace% 
+  theme_minimal(base_size=9) %+replace% 
     theme(
       panel.grid.minor = element_blank(),
       plot.background = element_rect(fill = '#f1faee', color = '#f1faee')
@@ -91,36 +91,22 @@ sub_pbox[is.na(sub_pbox)] = 0
 
 summarise_pbox <- sub_pbox %>%
   group_by(athlete_display_name) %>%
-  summarise(mins = mean(min), pts = mean(pts), ast = mean(ast), to = mean(to))
+  summarise(mins = mean(min), pts = mean(pts), ast = mean(ast), to = mean(to), mins_total = sum(min))
 
-ggplot(summarise_pbox, aes(x = pts, y = ast)) +
-  geom_point() + 
+summarise_min <- summarise_pbox %>%
+  filter(mins_total > 500) %>%
+  mutate(ast_min = ast/mins, pts_min = pts/mins, to_min = to/mins)
+
+ggplot(summarise_min, aes(x = ast_min, y = to_min)) +
+  geom_jitter(aes(color = pts_min))  +
+  geom_text(label= summarise_min$athlete_display_name) +
+  scale_colour_gradient(low = "#641220", high = "#e01e37")+
+  labs(title = "Assists and Turnovers per Minute",
+       subtitle = "For WNBA Players Who Played More than 500 Minutes",
+       x = "Assists Per Minute",
+       y = "Turnovers Per Minute",
+       fill = "Points Per Minute") +
   theme_ben()
 
 
 
-"""""
-sub_pbox <- sub_pbox %>%
-  group_by(athlete_display_name, season) %>%
-  mutate(mins_avg = mean(min)) %>%
-  mutate(pts_avg = mean(pts)) %>%
-  mutate(ast_avg = mean(ast)) %>%
-  mutate(to_avg = mean(to)) %>%
-  mutate(sum_min = sum(min))
-
-year_2018 <- sub_pbox %>%
-  filter(season == 2018) %>%
-  group_by(athlete_display_name) %>%
-  summarise(mins = mean(min), pts = mean(pts), ast = mean(ast), to = mean(to)) %>%
-  mutate()
-
-attach(year_2018)
-X <- data.frame(ast, to, pts)/mins
-detach(year_2018)
-
-THIS IS WRONG
-
-ggplot(X, aes(x=ast, y=to, color = pts)) +
-  geom_point()
-  
-"""""
